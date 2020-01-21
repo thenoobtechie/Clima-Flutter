@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
 
 class LocationScreen extends StatefulWidget {
-  var locationData;
+  final dynamic locationData;
 
   LocationScreen(this.locationData);
 
