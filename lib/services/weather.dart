@@ -5,13 +5,22 @@ import 'location.dart';
 import 'networking.dart';
 
 const String apiKey = 'df0acee9e82aba21c26e36bbd7fa94f2';
+const String api = 'https://api.openweathermap.org/data/2.5/weather';
 
 class WeatherModel {
 
   Future<dynamic> getLocationWeather() async {
     LocationData location = await getLocation();
     var networkHelper = NetworkHelper(
-        "https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric");
+        "$api?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric");
+    var jsonData = await networkHelper.getData();
+
+    return jsonData;
+  }
+
+  Future<dynamic> getLocationWeatherByCity({var cityName = ""}) async {
+    var networkHelper = NetworkHelper(
+        "$api?q=$cityName&appid=$apiKey&units=metric");
     var jsonData = await networkHelper.getData();
 
     return jsonData;

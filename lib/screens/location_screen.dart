@@ -13,7 +13,8 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  var temperature, city, weather;
+  double temperature;
+  var city, weather, weatherIcon, weatherMsg;
   WeatherModel weatherModel;
 
   @override
@@ -26,18 +27,20 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 
   void updateUI(dynamic locationData) {
+    setState(() {
+      if (locationData == null) {
+        temperature = 0.0;
+        city = "Error";
+        weather = 0;
+        weatherMsg = "Unable to fetch data";
+        return;
+      }
 
-    if(locationData == null) {
-      temperature = 0;
-      city = "Error";
-      weather = 0;
-      return;
-    }
-
-    int temp = locationData['main']['temp'];
-    temperature = temp;
-    city = locationData["name"];
-    weather = locationData['weather'][0]['id'];
+      double temp = locationData['main']['temp'];
+      temperature = temp;
+      city = locationData["name"];
+      weather = locationData['weather'][0]['id'];
+    });
   }
 
   @override
@@ -62,7 +65,7 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   FlatButton(
-                    onPressed: () async{
+                    onPressed: () async {
                       dynamic locData = await weatherModel.getLocationWeather();
                       updateUI(locData);
                     },
@@ -72,11 +75,17 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                   ),
                   FlatButton(
-                    onPressed: () {
-                      
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    onPressed: () async {
+                      var cityName = await Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
                         return CityScreen();
                       }));
+
+                      if (cityName != null) {
+                        dynamic locData = await weatherModel
+                            .getLocationWeatherByCity(cityName: cityName);
+                        updateUI(locData);
+                      }
                     },
                     child: Icon(
                       Icons.location_city,
@@ -90,7 +99,7 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      "$temperature°",
+                      "${temperature.toInt()}°c",
                       style: kTempTextStyle,
                     ),
                     Text(
@@ -103,7 +112,7 @@ class _LocationScreenState extends State<LocationScreen> {
               Padding(
                 padding: EdgeInsets.only(right: 15.0),
                 child: Text(
-                  "${weatherModel.getMessage(temperature)} in $city",
+                  "${weatherModel.getMessage(temperature.toInt())} in $city",
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),
